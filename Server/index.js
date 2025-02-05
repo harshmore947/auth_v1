@@ -78,12 +78,12 @@ app.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/" }),
   (req, res) => {
-    res.redirect("http://localhost:5173/dashboard");
+    res.redirect(`${process.env.CLIENT_URL}/dashboard`);
   }
 );
 
 app.get("/logout", (req, res) => {
-  req.logout(() => res.redirect("http://localhost:5173"));
+  req.logout(() => res.redirect(`${process.env.CLIENT_URL}`));
 });
 
 // Get User Info
