@@ -14,7 +14,7 @@ const Dashboard = ({ user }) => {
     studyHoursWeekdays: "",
     studyHoursWeekends: "",
   });
-  const API_URL = import.meta.env.BACKEND;
+  const API_URL = "https://auth-v1-git-main-harshmore947s-projects.vercel.app";
 
   // Redirect immediately if user.profile is true
   if (user?.profile) {
