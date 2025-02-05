@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-require('dotenv').config();
 
 const Dashboard = ({ user }) => {
   const [profile, setProfile] = useState({
