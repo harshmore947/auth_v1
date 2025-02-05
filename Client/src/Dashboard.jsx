@@ -15,7 +15,7 @@ const Dashboard = ({ user }) => {
     studyHoursWeekdays: "",
     studyHoursWeekends: "",
   });
-  const API_URL = import.meta.env.VITE_BACKEND_URL;
+  const API_URL = import.meta.env.BACKEND;
 
   // Redirect immediately if user.profile is true
   if (user?.profile) {

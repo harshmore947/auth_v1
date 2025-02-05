@@ -12,7 +12,7 @@ import Dashboard from "./Dashboard";
 import ForgotPassword from "./utils/ForgotPassword";
 import ResetPassword from "./utils/ResetPassword";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL = import.meta.env.BACKEND;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
