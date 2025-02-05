@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-require('dotenv').config();
 import "react-toastify/dist/ReactToastify.css";
 import {
   BrowserRouter as Router,
@@ -13,7 +12,7 @@ import Dashboard from "./Dashboard";
 import ForgotPassword from "./utils/ForgotPassword";
 import ResetPassword from "./utils/ResetPassword";
 
-const API_URL = process.env.BACKEND;
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
