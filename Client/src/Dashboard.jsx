@@ -14,7 +14,7 @@ const Dashboard = ({ user }) => {
     studyHoursWeekdays: "",
     studyHoursWeekends: "",
   });
-  const API_URL = "https://auth-v1-git-main-harshmore947s-projects.vercel.app";
+  const API_URL = "https://auth-v1-4.onrender.com";
 
   // Redirect immediately if user.profile is true
   if (user?.profile) {
