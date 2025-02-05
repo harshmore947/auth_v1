@@ -242,7 +242,7 @@ const App = () => {
 
   useEffect(() => {
     axios
-      .get(`${API_URL}user`, { withCredentials: true })
+      .get(`${API_URL}/user`, { withCredentials: true })
       .then((response) => setUser(response.data));
   }, []);
 
