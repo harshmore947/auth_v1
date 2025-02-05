@@ -3,26 +3,25 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     userName: {
         type: String,
-        unique: true,
-        trim: true,
+        trim: true, // Keep trim, but no uniqueness
     },
     email: {
         type: String,
-        unique: true,
-        tirm: true,
+        unique: true, // Email should be unique
+        trim: true,
     },
     password: {
         type: String,
-        // required: true,
     },
     googleId: {
-        type:String
+        type: String
     },
     profile: {
         type: Boolean,
-        default:false,
+        default: false,
     }
 }, { timestamps: true });
+
 
 const User = mongoose.model("User", userSchema);
 

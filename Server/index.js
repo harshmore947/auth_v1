@@ -13,7 +13,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace with your frontend URL
+    origin: "*", // Replace with your frontend URL
     credentials: true, // This is crucial for cookies/session to work
   })
 );
@@ -43,16 +43,25 @@ passport.use(
       callbackURL: "/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-      let user = await User.findOne({ googleId: profile.id });
-      if (!user) {
+      try {
+        let user = await User.findOne({ email: profile.emails[0].value });
+
+        if (user) {
+          return done(null, user); // User exists, proceed with login
+        }
+
+        // Create a new user if not found
         user = new User({
           googleId: profile.id,
           userName: profile.displayName,
           email: profile.emails[0].value,
         });
+
         await user.save();
+        return done(null, user);
+      } catch (error) {
+        return done(error, null);
       }
-      return done(null, user);
     }
   )
 );

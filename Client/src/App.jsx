@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import "react-toastify/dist/ReactToastify.css";
 import {
   BrowserRouter as Router,
   Route,
@@ -8,9 +9,13 @@ import {
   useNavigate,
 } from "react-router-dom";
 import Dashboard from "./Dashboard";
+import ForgotPassword from "./utils/ForgotPassword";
+import ResetPassword from "./utils/ResetPassword";
 
 const API_URL = "http://localhost:5000";
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 const Login = ({ setUser }) => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -18,30 +23,36 @@ const Login = ({ setUser }) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
 
-    // Validate Email
     if (name === "email") {
-      if (!emailRegex.test(value)) {
-        setEmailError("Invalid email format");
-      } else {
-        setEmailError("");
-      }
+      setEmailError(emailRegex.test(value) ? "" : "Invalid email format");
+    }
+
+    if (name === "password") {
+      setPasswordError(
+        passwordRegex.test(value)
+          ? ""
+          : "Password must be at least 8 characters, include uppercase, lowercase, digit, and special character"
+      );
     }
   };
   const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
 
   const login = async (e) => {
     e.preventDefault();
     if (emailError) return;
     try {
-      const res = await axios.post(`${API_URL}/login`, form, { withCredentials: true });
-      
+      const res = await axios.post(`${API_URL}/login`, form, {
+        withCredentials: true,
+      });
+
       setUser(res.data.user);
-      
+
       if (res.data.user?.profile) {
         console.log("User has a profile");
       }
-      
+      // toast.success("Sign-up successful!");
       navigate("/dashboard");
     } catch (err) {
       setEmailError(err.response?.data?.message || "An error occurred");
@@ -75,6 +86,9 @@ const Login = ({ setUser }) => {
             onChange={handleChange}
             required
           />
+          {passwordError && (
+            <p className="text-red-500 text-sm">{passwordError}</p>
+          )}
           <button
             className={`w-full text-white p-2 rounded ${
               emailError
@@ -95,8 +109,15 @@ const Login = ({ setUser }) => {
         </button>
         <div className="mt-4 text-center">
           <p>
+            <Link to="/forgot-password" className="text-blue-500">
+              Forgot Password?
+            </Link>
+          </p>
+        </div>
+        <div className="mt-4 text-center">
+          <p>
             Don't have an account?{" "}
-            <Link to="/signup" className="text-blue-500">
+            <Link to="/" className="text-blue-500">
               Sign Up
             </Link>
           </p>
@@ -108,8 +129,19 @@ const Login = ({ setUser }) => {
 
 const Signup = ({ setUser }) => {
   const [form, setForm] = useState({ userName: "", email: "", password: "" });
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const [passwordError, setPasswordError] = useState("");
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (name === "password") {
+      setPasswordError(
+        passwordRegex.test(value)
+          ? ""
+          : "Password must be at least 8 characters, include uppercase, lowercase, digit, and special character"
+      );
+    }
+  };
+
   const navigate = useNavigate();
 
   const register = async (e) => {
@@ -156,6 +188,9 @@ const Signup = ({ setUser }) => {
             onChange={handleChange}
             required
           />
+          {passwordError && (
+            <p className="text-red-500 text-sm">{passwordError}</p>
+          )}
           <button
             className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
             type="submit"
@@ -182,25 +217,25 @@ const Signup = ({ setUser }) => {
   );
 };
 
-const Home = ({ user, logout }) => (
-  <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
-    <h1 className="text-3xl font-bold mb-6">Authentication System</h1>
-      <div>
-        <Link
-          to="/login"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Login
-        </Link>
-        <Link
-          to="/signup"
-          className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
-        >
-          Sign Up
-        </Link>
-      </div>
-  </div>
-);
+// const Home = ({ user, logout }) => (
+//   <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
+//     <h1 className="text-3xl font-bold mb-6">Authentication System</h1>
+//     <div>
+//       <Link
+//         to="/login"
+//         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+//       >
+//         Login
+//       </Link>
+//       <Link
+//         to="/"
+//         className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
+//       >
+//         Sign Up
+//       </Link>
+//     </div>
+//   </div>
+// );
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -208,8 +243,7 @@ const App = () => {
   useEffect(() => {
     axios
       .get("http://localhost:5000/user", { withCredentials: true })
-      .then((response) => setUser(response.data))
-;
+      .then((response) => setUser(response.data));
   }, []);
 
   const logout = async () => {
@@ -219,11 +253,13 @@ const App = () => {
 
   return (
     <Router>
+      {/* <ToastContainer position="top-right" autoClose={3000} /> */}
       <Routes>
-        <Route path="/" element={<Home user={user} logout={logout} />} />
+        <Route path="/" element={<Signup setUser={setUser} />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/signup" element={<Signup setUser={setUser} />} />
         <Route path="/dashboard" element={<Dashboard user={user} />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>
     </Router>
   );
