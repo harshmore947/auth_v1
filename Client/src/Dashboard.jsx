@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+require('dotenv').config();
 
 const Dashboard = ({ user }) => {
   const [profile, setProfile] = useState({
@@ -15,7 +16,7 @@ const Dashboard = ({ user }) => {
     studyHoursWeekends: "",
   });
 
-  const API_URL = "http://localhost:5000";
+  const API_URL = process.env.BACKEND;
 
   // Redirect immediately if user.profile is true
   if (user?.profile) {
