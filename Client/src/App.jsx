@@ -41,6 +41,7 @@ const Login = ({ setUser }) => {
 
   const login = async (e) => {
     e.preventDefault();
+    setEmailError(""); 
     if (emailError) return;
     try {
       const res = await axios.post(`${API_URL}/login`, form, {
@@ -96,7 +97,6 @@ const Login = ({ setUser }) => {
                 : "bg-blue-500 hover:bg-blue-600"
             }`}
             type="submit"
-            disabled={emailError}
           >
             Login
           </button>
