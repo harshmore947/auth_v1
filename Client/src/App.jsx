@@ -48,7 +48,7 @@ const Login = ({ setUser }) => {
         withCredentials: true,
       });
 
-      setUser(res.data.user);
+      setUser(res.data?.user);
 
       if (res.data.user?.profile) {
         console.log("User has a profile");
@@ -151,7 +151,7 @@ const Signup = ({ setUser }) => {
       setUser(res.data.user);
       navigate("/dashboard");
     } catch (err) {
-      console.error(err.response.data.msg);
+      console.error(err.response?.data?.msg);
     }
   };
 
