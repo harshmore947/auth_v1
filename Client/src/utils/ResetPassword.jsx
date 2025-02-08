@@ -13,6 +13,8 @@ const ResetPassword = () => {
   // Read email from cookies
   const email = Cookies.get("resetEmail");
 
+  const API_URL = "https://auth-v1-4.onrender.com";
+
   useEffect(() => {
     if (!email) {
       setError("Session expired. Please request OTP again.");
