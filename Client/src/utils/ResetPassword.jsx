@@ -16,25 +16,27 @@ const ResetPassword = () => {
   useEffect(() => {
     if (!email) {
       setError("Session expired. Please request OTP again.");
+      navigate("/forgot-password"); // Redirect to request OTP again
     }
-  }, [email]);
+  }, [email, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setError("");
       const res = await axios.post(`${API_URL}/reset-password`, { email, otp, newPassword }, { withCredentials: true });
       
-      setMessage(res.data.msg);
-      setError("");
+      setMessage(res.data?.msg);
 
       setTimeout(() => {
-        // Cookies.remove("resetEmail"); // Remove email cookie after use
+        Cookies.remove("resetEmail"); // Remove email cookie after use
         navigate("/login");
       }, 3000);
+      
 
     } catch (err) {
-      setError(err.response?.data?.msg || "An error occurred");
       setMessage("");
+      setError(err.response?.data?.msg || "An error occurred");
     }
   };
 
