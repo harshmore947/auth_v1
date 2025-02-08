@@ -204,6 +204,14 @@ const forgotPassword = async (req, res) => {
     // Send OTP via Email (use nodemailer)
     // await sendEmail(user.email, "Your OTP", `Your OTP is ${otp}`);
 
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -213,6 +221,7 @@ const forgotPassword = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
+    
     res.status(200).json({ msg: "OTP sent to your email" });
 
   } catch (error) {
