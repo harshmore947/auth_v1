@@ -15,8 +15,6 @@ app.use(
   cors({
     origin: "*", // Allows requests from any domain
     credentials: true, // Important for cookies, sessions, and authorization headers
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // Allow all HTTP methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
   })
 );
 app.use(cookieParser());
