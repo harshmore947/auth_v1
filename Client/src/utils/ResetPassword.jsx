@@ -28,7 +28,7 @@ const ResetPassword = () => {
       setError("");
 
       setTimeout(() => {
-        Cookies.remove("resetEmail"); // Remove email cookie after use
+        // Cookies.remove("resetEmail"); // Remove email cookie after use
         navigate("/login");
       }, 3000);
 
