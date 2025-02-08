@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const ResetPassword = () => {
-  const { token } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const email = queryParams.get("email"); // Get email from URL params
+
+  const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -14,10 +18,14 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_URL}/reset-password/${token}`, { newPassword });
+      const res = await axios.post(`${API_URL}/reset-password`, { email, otp, newPassword });
       setMessage(res.data.msg);
       setError("");
-      setTimeout(() => navigate("/login"), 3000);
+
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
     } catch (err) {
       setError(err.response?.data?.msg || "An error occurred");
       setMessage("");
@@ -31,6 +39,14 @@ const ResetPassword = () => {
         {message && <p className="text-green-500">{message}</p>}
         {error && <p className="text-red-500">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            className="w-full p-2 border rounded"
+            type="text"
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            required
+          />
           <input
             className="w-full p-2 border rounded"
             type="password"

@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const API_URL = "http://localhost:5000";
 
@@ -14,6 +16,11 @@ const ForgotPassword = () => {
       const res = await axios.post(`${API_URL}/forgot-password`, { email });
       setMessage(res.data.msg);
       setError("");
+
+      // Wait 3 seconds, then redirect to ResetPassword page
+      setTimeout(() => {
+        navigate(`/reset-password?email=${encodeURIComponent(email)}`);
+      }, 3000);
     } catch (err) {
       setError(err.response?.data?.msg || "An error occurred");
       setMessage("");
@@ -36,7 +43,7 @@ const ForgotPassword = () => {
             required
           />
           <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-            Send Reset Link
+            Send OTP
           </button>
         </form>
       </div>

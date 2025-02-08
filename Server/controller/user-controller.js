@@ -100,74 +100,143 @@ const loginUser = async (req, res) => {
   }
 };
 
+// const forgotPassword = async (req, res) => {
+//   try {
+//     const { email } = req.body;
+
+//     // Check if user exists
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(404).json({ msg: "User not found" });
+//     }
+
+//     // Generate a reset token (expires in 15 minutes)
+//     const resetToken = jwt.sign(
+//       { userId: user._id },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "15m" }
+//     );
+
+//     // Reset link
+//     const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+
+//     // Configure Nodemailer Transporter
+//     const transporter = nodemailer.createTransport({
+//       service: "Gmail",
+//       auth: {
+//         user: process.env.EMAIL_USER,
+//         pass: process.env.EMAIL_PASS,
+//       },
+//     });
+
+//     // Email content
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: email,
+//       subject: "Password Reset Request",
+//       html: `
+//         <h3>Password Reset</h3>
+//         <p>Click the link below to reset your password. This link is valid for 15 minutes.</p>
+//         <a href="${resetLink}">${resetLink}</a>
+//       `,
+//     };
+
+//     // Send email
+//     await transporter.sendMail(mailOptions);
+
+//     res.status(200).json({ msg: "Password reset link sent to your email" });
+
+//   } catch (error) {
+//     res.status(500).json({ msg: "Error in forgot password process", error: error.message });
+//   }
+// };
+
+
+// const resetPassword = async (req, res) => {
+//   try {
+//     const { token } = req.params;
+//     const { newPassword } = req.body;
+
+//     // Verify Token
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     const user = await User.findById(decoded.userId);
+
+//     if (!user) {
+//       return res.status(400).json({ msg: "Invalid or expired token" });
+//     }
+
+//     // Hash New Password
+//     const hashedPassword = await bcrypt.hash(newPassword, 10);
+//     user.password = hashedPassword;
+//     await user.save();
+
+//     res.status(200).json({ msg: "Password reset successful, you can now login" });
+
+//   } catch (error) {
+//     res.status(500).json({ msg: "Error in resetting password", error: error.message });
+//   }
+// };
+
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check if user exists
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
+    if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // Generate a reset token (expires in 15 minutes)
-    const resetToken = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "15m" }
-    );
+    // Generate 4-digit OTP
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    const otpExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes expiry
 
-    // Reset link
-    const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    // Store OTP in database
+    user.resetOTP = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
 
-    // Configure Nodemailer Transporter
+    // Send OTP via email
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: process.env.EMAIL_USER, 
+        user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
 
-    // Email content
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Password Reset Request",
-      html: `
-        <h3>Password Reset</h3>
-        <p>Click the link below to reset your password. This link is valid for 15 minutes.</p>
-        <a href="${resetLink}">${resetLink}</a>
-      `,
+      subject: "Password Reset OTP",
+      html: `<h3>Your OTP for password reset is: <strong>${otp}</strong></h3>
+             <p>This OTP is valid for 15 minutes.</p>`,
     };
 
-    // Send email
     await transporter.sendMail(mailOptions);
-
-    res.status(200).json({ msg: "Password reset link sent to your email" });
+    res.status(200).json({ msg: "OTP sent to your email" });
 
   } catch (error) {
     res.status(500).json({ msg: "Error in forgot password process", error: error.message });
   }
 };
 
-
 const resetPassword = async (req, res) => {
   try {
-    const { token } = req.params;
-    const { newPassword } = req.body;
+    const { email, otp, newPassword } = req.body;
 
-    // Verify Token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ msg: "User not found" });
 
-    if (!user) {
-      return res.status(400).json({ msg: "Invalid or expired token" });
+    // Check if OTP is valid
+    if (user.resetOTP !== parseInt(otp) || Date.now() > user.otpExpiry) {
+      return res.status(400).json({ msg: "Invalid or expired OTP" });
     }
 
-    // Hash New Password
+    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
+
+    // Clear OTP fields
+    user.resetOTP = null;
+    user.otpExpiry = null;
     await user.save();
 
     res.status(200).json({ msg: "Password reset successful, you can now login" });
@@ -176,6 +245,5 @@ const resetPassword = async (req, res) => {
     res.status(500).json({ msg: "Error in resetting password", error: error.message });
   }
 };
-
 
 module.exports = { signupUser, loginUser, forgotPassword, resetPassword };
