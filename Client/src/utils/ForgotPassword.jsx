@@ -13,13 +13,13 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setError("");
       const res = await axios.post(`${API_URL}/forgot-password`, { email });
       setMessage(res.data.msg);
-      setError("");
 
       // Wait 3 seconds, then redirect to ResetPassword page
       setTimeout(() => {
-        navigate(`/reset-password?email=${encodeURIComponent(email)}`);
+        navigate("/reset-password");
       }, 3000);
     } catch (err) {
       setError(err.response?.data?.msg || "An error occurred");
