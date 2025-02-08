@@ -13,8 +13,10 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://auth-v1-git-main-harshmore947s-projects.vercel.app", 
-    credentials: true, // This is crucial for cookies/session to work
+    origin: "*", // Allows requests from any domain
+    credentials: true, // Important for cookies, sessions, and authorization headers
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // Allow all HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
   })
 );
 app.use(cookieParser());
