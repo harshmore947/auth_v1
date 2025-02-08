@@ -237,8 +237,7 @@ const forgotPassword = async (req, res) => {
 };
 const resetPassword = async (req, res) => {
   try {
-    const { otp, newPassword } = req.body;
-    const email = req.cookies.resetEmail; // Get email from cookie
+    const { email,otp, newPassword } = req.body; // Get email from cookie
 
     if (!email) {
       return res.status(400).json({ msg: "Session expired. Try again." });
