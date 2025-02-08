@@ -25,7 +25,7 @@ const ForgotPassword = () => {
       setError("");
   
       setTimeout(() => {
-        window.location.href = "/reset-password"; // Use direct navigation
+        navigate("/reset-password"); // Use direct navigation
       }, 3000);
   
     } catch (err) {
