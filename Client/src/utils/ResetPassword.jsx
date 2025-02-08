@@ -1,31 +1,36 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const email = queryParams.get("email"); // Get email from URL params
-
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const API_URL = "https://auth-v1-4.onrender.com";
+  // Read email from cookies
+  const email = Cookies.get("resetEmail");
+
+  useEffect(() => {
+    if (!email) {
+      setError("Session expired. Please request OTP again.");
+    }
+  }, [email]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_URL}/reset-password`, { email, otp, newPassword });
+      const res = await axios.post(`${API_URL}/reset-password`, { email, otp, newPassword }, { withCredentials: true });
       setMessage(res.data.msg);
       setError("");
 
-      // Redirect to login after 3 seconds
       setTimeout(() => {
+        Cookies.remove("resetEmail"); // Remove email cookie after use
         navigate("/login");
       }, 3000);
+
     } catch (err) {
       setError(err.response?.data?.msg || "An error occurred");
       setMessage("");

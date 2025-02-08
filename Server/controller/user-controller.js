@@ -181,63 +181,58 @@ const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
+    // Check if user exists
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ msg: "User not found" });
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
 
-    // Generate 4-digit OTP
-    const otp = Math.floor(1000 + Math.random() * 9000);
-    const otpExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes expiry
-
-    // Store OTP in database
+    // Generate OTP
+    const otp = Math.floor(1000 + Math.random() * 9000); // 4-digit OTP
     user.resetOTP = otp;
-    user.otpExpiry = otpExpiry;
+    user.otpExpiry = Date.now() + 15 * 60 * 1000; // Expires in 15 min
     await user.save();
 
-    // Send OTP via email
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
+    // Set cookie (HTTP only to prevent XSS)
+    res.cookie("resetEmail", email, {
+      httpOnly: true,
+      secure: true, // Set true if using HTTPS
+      sameSite: "Strict", // Adjust based on frontend-backend domains
+      maxAge: 15 * 60 * 1000, // 15 minutes expiry
     });
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Password Reset OTP",
-      html: `<h3>Your OTP for password reset is: <strong>${otp}</strong></h3>
-             <p>This OTP is valid for 15 minutes.</p>`,
-    };
+    // Send OTP via Email (use nodemailer)
+    await sendEmail(user.email, "Your OTP", `Your OTP is ${otp}`);
 
-    await transporter.sendMail(mailOptions);
     res.status(200).json({ msg: "OTP sent to your email" });
 
   } catch (error) {
     res.status(500).json({ msg: "Error in forgot password process", error: error.message });
   }
 };
-
 const resetPassword = async (req, res) => {
   try {
-    const { email, otp, newPassword } = req.body;
+    const { otp, newPassword } = req.body;
+    const email = req.cookies.resetEmail; // Get email from cookie
+
+    if (!email) {
+      return res.status(400).json({ msg: "Session expired. Try again." });
+    }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // Check if OTP is valid
-    if (user.resetOTP !== parseInt(otp) || Date.now() > user.otpExpiry) {
+    if (!user || user.resetOTP !== parseInt(otp) || Date.now() > user.otpExpiry) {
       return res.status(400).json({ msg: "Invalid or expired OTP" });
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-
-    // Clear OTP fields
-    user.resetOTP = null;
+    // Hash New Password
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetOTP = null; // Clear OTP after reset
     user.otpExpiry = null;
     await user.save();
+
+    // Clear email cookie
+    res.clearCookie("resetEmail");
 
     res.status(200).json({ msg: "Password reset successful, you can now login" });
 

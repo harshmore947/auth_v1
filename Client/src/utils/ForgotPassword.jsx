@@ -13,14 +13,14 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setError("");
-      const res = await axios.post(`${API_URL}/forgot-password`, { email });
+      const res = await axios.post(`${API_URL}/forgot-password`, { email }, { withCredentials: true });
       setMessage(res.data.msg);
-
-      // Wait 3 seconds, then redirect to ResetPassword page
+      setError("");
+  
       setTimeout(() => {
-        navigate("/reset-password");
+        window.location.href = "/reset-password"; // Use direct navigation
       }, 3000);
+  
     } catch (err) {
       setError(err.response?.data?.msg || "An error occurred");
       setMessage("");
