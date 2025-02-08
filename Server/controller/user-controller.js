@@ -202,8 +202,17 @@ const forgotPassword = async (req, res) => {
     });
 
     // Send OTP via Email (use nodemailer)
-    await sendEmail(user.email, "Your OTP", `Your OTP is ${otp}`);
+    // await sendEmail(user.email, "Your OTP", `Your OTP is ${otp}`);
 
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset OTP",
+      html: `<h3>Your OTP for password reset is: <strong>${otp}</strong></h3>
+             <p>This OTP is valid for 15 minutes.</p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
     res.status(200).json({ msg: "OTP sent to your email" });
 
   } catch (error) {
