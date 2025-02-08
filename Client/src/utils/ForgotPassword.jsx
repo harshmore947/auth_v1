@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +15,13 @@ const ForgotPassword = () => {
     e.preventDefault();
     try {
       const res = await axios.post(`${API_URL}/forgot-password`, { email }, { withCredentials: true });
+
+      Cookies.set("resetEmail", email, {
+        expires: 0.01, // 15 minutes (0.01 days = ~15 mins)
+        secure: true,
+        sameSite: "Strict",
+      });
+      
       setMessage(res.data.msg);
       setError("");
   

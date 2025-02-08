@@ -23,6 +23,7 @@ const ResetPassword = () => {
     e.preventDefault();
     try {
       const res = await axios.post(`${API_URL}/reset-password`, { email, otp, newPassword }, { withCredentials: true });
+      
       setMessage(res.data.msg);
       setError("");
 
