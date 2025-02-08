@@ -8,7 +8,7 @@ const ForgotPassword = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const API_URL = "http://localhost:5000";
+  const API_URL = "https://auth-v1-4.onrender.com";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
