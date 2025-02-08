@@ -221,6 +221,13 @@ const forgotPassword = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
+
+    res.cookie("resetEmail", email, {
+      httpOnly: false, // Make sure it's accessible via JavaScript
+      secure: true, // Required if using HTTPS
+      sameSite: "Strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });    
     
     res.status(200).json({ msg: "OTP sent to your email" });
 

@@ -18,10 +18,9 @@ const ForgotPassword = () => {
 
       Cookies.set("resetEmail", email, {
         expires: 0.01, // 15 minutes (0.01 days = ~15 mins)
-        secure: true,
         sameSite: "Strict",
       });
-      
+
       setMessage(res.data.msg);
       setError("");
   
